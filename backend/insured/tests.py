@@ -248,3 +248,232 @@ class MyContractsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["subject"], "Life coverage")
+
+class InsuredPersonDetailTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.admin_user = User.objects.create_user(
+            username="admin_detail_user",
+            password="admin_password_123",
+            is_staff = True,
+        )
+        self.token = Token.objects.create(user=self.admin_user)
+
+        self.insured_user = User.objects.create_user(
+            username="detail_client_user",
+            password="client_password_123",
+        )
+
+        self.insured_person = InsuredPerson.objects.create(
+            user=self.insured_user,
+            first_name="Petr",
+            last_name="Dvořák",
+            age=40,
+            address="Ostrava",
+            phone_number="+420 555 666 777",
+        )
+
+    def test_admin_can_view_insured_person_detail(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+
+        response = self.client.get(
+            f'/api/insured-people/{self.insured_person.id}/',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["first_name"], "Petr")
+        self.assertEqual(response.data["last_name"], "Dvořák")
+
+class InsuredPersonUpdateTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.admin_user = User.objects.create_user(
+            username="admin_update_user",
+            password="admin_password_123",
+            is_staff = True,
+        )
+        self.token = Token.objects.create(user=self.admin_user)
+
+        self.insured_user = User.objects.create_user(
+            username="update_client_user",
+            password="client_password_123",
+        )
+
+        self.insured_person = InsuredPerson.objects.create(
+            user=self.insured_user,
+            first_name="Eva",
+            last_name="Kovářová",
+            age=35,
+            address="Plzeň",
+            phone_number="+420 444 555 666",
+        )
+
+    def test_admin_can_update_insured_person(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+
+        response = self.client.patch(
+            f'/api/insured-people/{self.insured_person.id}/',
+            {
+                "last_name": "Krejčířová",
+                "age": 36,
+                "address": "Ostrava",
+                "phone_number": "+420 434 555 666",
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["address"], "Ostrava")
+        self.assertEqual(response.data["last_name"], "Krejčířová")
+        self.assertEqual(response.data["age"], 36)
+        self.assertEqual(response.data["phone_number"], "+420 434 555 666")
+
+class InsuredPersonDeleteTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.admin_user = User.objects.create_user(
+            username="admin_delete_user",
+            password="admin_password_123",
+            is_staff = True,
+        )
+        self.token = Token.objects.create(user=self.admin_user)
+
+        self.insured_user = User.objects.create_user(
+            username="delete_client_user",
+            password="client_password_123",
+        )
+
+        self.insured_person = InsuredPerson.objects.create(
+            user=self.insured_user,
+            first_name="Marek",
+            last_name="Svoboda",
+            age=28,
+            address="Liberec",
+            phone_number="+420 222 333 444",
+        )
+
+    def test_admin_can_delete_insured_person(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+
+        response = self.client.delete(
+            f'/api/insured-people/{self.insured_person.id}/',
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(InsuredPerson.objects.filter(id=self.insured_person.id).exists())
+
+class MyContractsPrivacyTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.first_user = User.objects.create_user(
+            username="first_contract_user",
+            password="client_password_123",
+        )
+        self.first_token = Token.objects.create(user=self.first_user)
+
+        self.second_user = User.objects.create_user(
+            username="second_contract_user",
+            password="client_password_123",
+        )
+
+        self.first_person = InsuredPerson.objects.create(
+            user=self.first_user,
+            first_name="Anna",
+            last_name="První",
+            age=35,
+            address="Plzeň",
+            phone_number="+420 444 555 666",
+        )
+
+        self.second_person = InsuredPerson.objects.create(
+            user=self.second_user,
+            first_name="Lucie",
+            last_name="Druhá",
+            age=28,
+            address="Ostrava",
+            phone_number="+420 434 555 666",
+        )
+
+        self.insurance_type = InsuranceType.objects.create(
+            name_en="Health insurance",
+            name_cs="Zdravotní pojištění",
+            default_amount=300000,
+        )
+
+        self.first_contract = InsuranceContract.objects.create(
+            insured_person=self.first_person,
+            insurance_type=self.insurance_type,
+            subject="First user contract",
+            amount=500000,
+            contract_date='2026-09-13',
+            valid_until='2027-09-13',
+        )
+
+        self.second_contract = InsuranceContract.objects.create(
+            insured_person=self.second_person,
+            insurance_type=self.insurance_type,
+            subject="Second user contract",
+            amount=300000,
+            contract_date='2026-09-13',
+            valid_until='2027-09-13',
+        )
+
+    def test_client_can_see_only_own_contracts(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.first_token.key}"
+        )
+
+        response = self.client.get("/api/my-contracts/")
+
+        self.assertEqual(response.status_code, 200)
+
+        subjects = [
+            contract["subject"]
+            for contract in response.data
+        ]
+
+        self.assertIn("First user contract", subjects)
+        self.assertNotIn("Second user contract", subjects)
+
+class MyProfileTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create_user(
+            username="profile_user",
+            password="client_password_123",
+        )
+        self.token = Token.objects.create(user=self.user)
+
+        self.insured_person = InsuredPerson.objects.create(
+            user=self.user,
+            first_name="Marek",
+            last_name="Profil",
+            age=28,
+            address="Liberec",
+            phone_number="+420 444 555 666",
+        )
+
+    def test_client_can_see_own_profile(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+
+        response = self.client.get("/api/my-profile/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["first_name"], "Marek")
+        self.assertEqual(response.data["last_name"], "Profil")
+        self.assertEqual(response.data["age"], 28)
+        self.assertEqual(response.data["address"], "Liberec")
+        self.assertEqual(response.data["phone_number"], "+420 444 555 666")
