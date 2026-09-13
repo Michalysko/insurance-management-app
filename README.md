@@ -301,7 +301,10 @@ Real `.env` files are intentionally ignored by Git and must not be committed.
 cd backend
 python manage.py check
 python manage.py makemigrations --check
+python manage.py test
 ```
+
+The backend test suite currently covers authentication, administrator and client permissions, insured person CRUD operations, insurance contract creation, client profile access, and protection of client-specific contract data.
 
 ### Frontend
 
@@ -314,10 +317,10 @@ npm run build
 Current project status:
 
 - Django system check passes.
+- Backend automated tests pass.
 - Frontend lint passes.
 - Frontend production build passes.
 - The application is deployed and available as a public demo.
-- Backend automated tests are planned as a future improvement.
 
 ## Security Notes
 
@@ -362,7 +365,7 @@ Planned improvements:
 
 - Add screenshots to this README.
 - Add a small dashboard with summary statistics.
-- Add automated backend tests for authentication, permissions, CRUD operations, and search.
+- Expand backend tests for insurance type CRUD operations, search, and validation.
 - Improve demo data handling with a repeatable seed command.
 - Add safer demo-mode restrictions for destructive administrator actions.
 - Continue polishing responsive design for mobile and tablet viewports.
