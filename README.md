@@ -30,7 +30,7 @@ The administrator can manage insured people, insurance types, and insurance cont
 
 ## Project Purpose
 
-This project was built as a practical full-stack portfolio application. It demonstrates how a CRUD system can be structured with a separate REST API, relational data, authentication, role-based permissions, search, pagination, validation, deployment configuration, and a React user interface.
+This project was built as a practical full-stack portfolio application. It demonstrates how a CRUD system can be structured with a separate REST API, relational data, authentication, role-based permissions, search, pagination, validation, deployment configuration, and a React user interface. The application also includes a small interactive demo assistant that helps visitors understand the administrator and client workflows.
 
 ## Features
 
@@ -46,6 +46,7 @@ This project was built as a practical full-stack portfolio application. It demon
 - Pagination for larger datasets
 - Czech and English language switcher
 - Bilingual insurance type names
+- Interactive demo assistant for first-time visitors
 - Frontend and backend form validation
 - Centralized frontend API client
 - Environment-based configuration for local and production environments
@@ -360,12 +361,11 @@ The deployed demo uses:
 Planned improvements:
 
 - Add screenshots to this README.
-- Improve the public demo login page with clearer demo account information.
 - Add a small dashboard with summary statistics.
 - Add automated backend tests for authentication, permissions, CRUD operations, and search.
 - Improve demo data handling with a repeatable seed command.
 - Add safer demo-mode restrictions for destructive administrator actions.
-- Polish responsive design for mobile and tablet viewports.
+- Continue polishing responsive design for mobile and tablet viewports.
 - Improve accessibility details such as labels, focus states, and keyboard navigation.
 
 ## What I Learned
