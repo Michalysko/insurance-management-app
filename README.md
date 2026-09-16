@@ -304,7 +304,7 @@ python manage.py makemigrations --check
 python manage.py test
 ```
 
-The backend test suite currently covers authentication, administrator and client permissions, insured person CRUD operations, insurance contract creation, client profile access, and protection of client-specific contract data.
+The backend test suite currently covers authentication, administrator and client permissions, insured person CRUD operations, insurance type CRUD operations, insurance contract creation, client profile access, protection of client-specific contract data, API search, and backend validation errors.
 
 ### Frontend
 
@@ -365,7 +365,7 @@ Planned improvements:
 
 - Add screenshots to this README.
 - Add a small dashboard with summary statistics.
-- Expand backend tests for insurance type CRUD operations, search, and validation.
+- Expand backend tests for additional edge cases and permission scenarios.
 - Improve demo data handling with a repeatable seed command.
 - Add safer demo-mode restrictions for destructive administrator actions.
 - Continue polishing responsive design for mobile and tablet viewports.
